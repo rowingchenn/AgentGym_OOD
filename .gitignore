@@ -1,6 +1,3 @@
-# WebArena config file
-agentenv-webarena/webarena/.auth
-agentenv-webarena/webarena/config_files/*.json
 
 
 # Byte-compiled / optimized / DLL files
