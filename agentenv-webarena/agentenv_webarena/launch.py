@@ -36,7 +36,7 @@ def launch():
     options = {
         "bind": "{}:{}".format(args.host, args.port),
         "workers": args.workers,
-        "timeout": 120,  # first creation takes long time
+        "timeout": 300,  # first creation takes long time
         "reload": True,
     }
 
