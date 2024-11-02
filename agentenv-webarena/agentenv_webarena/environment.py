@@ -117,7 +117,7 @@ class WebarenaEnvServer:
             instruction_path="./agent/prompts/jsons/p_cot_id_actree_2s.json"
         )
 
-    def create(self) -> int:
+    async def create(self) -> int:
         """
         Only call this create function once.
         """
@@ -132,7 +132,7 @@ class WebarenaEnvServer:
         self.trajectory[self._max_id] = []
         self.meta_data[self._max_id] = {}
         self.intent[self._max_id] = ""
-        self.env[self._max_id].reset()
+        await self.env[self._max_id].reset()
         self._max_id += 1
         return env_idx
 

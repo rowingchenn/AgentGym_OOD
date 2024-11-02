@@ -20,6 +20,7 @@ from playwright.sync_api import (
     expect,
     sync_playwright,
 )
+from playwright.async_api import async_playwright
 
 from .actions import Action, execute_action, get_action_space
 from .processors import ObservationHandler, ObservationMetadata
@@ -51,9 +52,7 @@ def parse_action(action: str) -> PlaywrightScript:
             assert len(splitted) >= 4
             match splitted[2:]:
                 case [name, operation]:
-                    return PlaywrightScript(
-                        "get_by_role", destination, name, operation
-                    )
+                    return PlaywrightScript("get_by_role", destination, name, operation)
                 case [name, operation, value]:
                     return PlaywrightScript(
                         "get_by_role", destination, name, operation, value
@@ -105,9 +104,7 @@ class ScriptBrowserEnv(Env[dict[str, Observation], Action]):
                 self.text_observation_type = ""  # type: ignore[assignment]
                 self.main_observation_type = "image"
             case _:
-                raise ValueError(
-                    f"Unsupported observation type: {observation_type}"
-                )
+                raise ValueError(f"Unsupported observation type: {observation_type}")
 
         self.observation_handler = ObservationHandler(
             self.main_observation_type,
@@ -117,15 +114,13 @@ class ScriptBrowserEnv(Env[dict[str, Observation], Action]):
             self.viewport_size,
         )
 
-        self.observation_space = (
-            self.observation_handler.get_observation_space()
-        )
+        self.observation_space = self.observation_handler.get_observation_space()
 
     @beartype
-    def setup(self, config_file: Path | None = None) -> None:
-        self.context_manager = sync_playwright()
-        self.playwright = self.context_manager.__enter__()
-        self.browser = self.playwright.chromium.launch(
+    async def setup(self, config_file: Path | None = None) -> None:
+        self.context_manager = await async_playwright().start()
+        self.playwright = self.context_manager
+        self.browser = await self.playwright.chromium.launch(
             headless=self.headless, slow_mo=self.slow_mo
         )
 
@@ -151,9 +146,7 @@ class ScriptBrowserEnv(Env[dict[str, Observation], Action]):
             start_urls = start_url.split(" |AND| ")
             for url in start_urls:
                 page = self.context.new_page()
-                client = page.context.new_cdp_session(
-                    page
-                )  # talk to chrome devtools
+                client = page.context.new_cdp_session(page)  # talk to chrome devtools
                 if self.text_observation_type == "accessibility_tree":
                     client.send("Accessibility.enable")
                 page.client = client  # type: ignore # TODO[shuyanzh], fix this hackey client

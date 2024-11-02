@@ -129,13 +129,16 @@ class BaseTask:
         while not done:
             input_length = len(conversation_tokenized["input_ids"])
             # if input_length exceeds 4096, break
+            # TODO: maybe we shouldn't limit the input_length
             if input_length > 4096:
                 break
+            # TODO: What if the model is an openai model?
             output = model.generate(
                 torch.tensor(
                     [conversation_tokenized["input_ids"]], device=model.device
                 ),
                 generation_config=generation_config,
+                no_repeat_ngram_size=3 # prevent repeating n-grams
             )
             if isinstance(output, GenerateOutput):
                 output = output.sequences
